@@ -1,9 +1,9 @@
-import mongoose, { Schema, Document, Model } from "mongoose";
+import mongoose, { Schema, Model } from "mongoose";
 
 export type WatchStatus = "unregistered" | "registered" | "sold";
 export type WarrantyStatus = "active" | "expired" | "void";
 
-export interface IWatch extends Document {
+export interface IWatch {
   serialNumber: string;         // Normalized UPPERCASE, unique
   model: string;                // e.g. "QG-ER-01"
   collection: string;           // e.g. "Eternal Reign"
@@ -80,11 +80,12 @@ const WatchSchema = new Schema<IWatch>(
     },
   },
   {
+    suppressReservedKeysWarning: true,
     timestamps: true,
     // Never expose _id or __v to API consumers; use a virtual `id` instead
     toJSON: {
       virtuals: true,
-      transform: (_doc, ret) => {
+      transform: (_doc, ret: { _id?: unknown; __v?: unknown }) => {
         delete ret._id;
         delete ret.__v;
         return ret;
@@ -92,9 +93,6 @@ const WatchSchema = new Schema<IWatch>(
     },
   }
 );
-
-// Ensure the unique index is created at the DB level
-WatchSchema.index({ serialNumber: 1 }, { unique: true });
 
 // Normalize serial before save — strip whitespace, force uppercase
 WatchSchema.pre("save", function (next) {
