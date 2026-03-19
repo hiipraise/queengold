@@ -169,17 +169,8 @@ function PassportField({
   highlight?: "green" | "amber" | "red";
 }) {
   const highlightColor = highlight
-<<<<<<< HEAD
   ? { green: "#22783C", amber: "#B8762E", red: "#C0392B" }[highlight]
   : "inherit";
-=======
-    ? {
-        green: "#22783C",
-        amber: "#B8762E",
-        red: "#C0392B",
-      }[highlight]
-    : "inherit";
->>>>>>> 4c7f69b5ae5cdcea977eefad14235ecb76096abc
 
   return (
     <div
