@@ -31,7 +31,7 @@ const ScanLogSchema = new Schema<IScanLog>(
     timestamp: {
       type: Date,
       default: () => new Date(),
-      index: true,
+      // index: true,
     },
   },
   {
