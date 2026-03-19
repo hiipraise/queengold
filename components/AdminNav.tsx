@@ -18,6 +18,7 @@ export default function AdminNav({ userName }: Props) {
   const links = [
     { href: "/admin/watches", label: "Watches" },
     { href: "/admin/logs",    label: "Scan Logs" },
+    { href: "/admin/account", label: "Account" },
     { href: "/verify",        label: "Public Verify", external: true },
   ];
 
