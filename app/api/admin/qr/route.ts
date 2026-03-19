@@ -1,0 +1,42 @@
+import { NextRequest, NextResponse } from "next/server";
+import QRCode from "qrcode";
+import { requireAdmin } from "@/lib/admin-guard";
+import { normalizeSerial } from "@/lib/utils";
+
+export async function GET(request: NextRequest) {
+  const { error } = await requireAdmin();
+  if (error) return error;
+
+  const { searchParams } = new URL(request.url);
+  const rawSerial = searchParams.get("sn") ?? "";
+  const serial    = normalizeSerial(rawSerial);
+
+  if (!serial) {
+    return NextResponse.json({ error: "sn param required." }, { status: 400 });
+  }
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://queengold.com";
+  const url     = `${siteUrl}/verify?sn=${encodeURIComponent(serial)}`;
+
+  const dataUrl = await QRCode.toDataURL(url, {
+    errorCorrectionLevel: "H",
+    margin:  2,
+    width:   400,
+    color: {
+      dark:  "#2D0614",
+      light: "#F5E6C8",
+    },
+  });
+
+  // Strip the data:image/png;base64, prefix and return raw PNG
+  const base64 = dataUrl.replace(/^data:image\/png;base64,/, "");
+  const buf    = Buffer.from(base64, "base64");
+
+  return new NextResponse(buf, {
+    headers: {
+      "Content-Type":        "image/png",
+      "Content-Disposition": `attachment; filename="qr-${serial}.png"`,
+      "Cache-Control":       "public, max-age=86400",
+    },
+  });
+}
