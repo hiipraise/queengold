@@ -168,11 +168,13 @@ function PassportField({
   mono?:     boolean;
   highlight?: "green" | "amber" | "red";
 }) {
-  const highlightColor = {
-    green: "#22783C",
-    amber: "#B8762E",
-    red:   "#C0392B",
-  }[highlight ?? ""] ?? "inherit";
+  const highlightColor = highlight
+    ? {
+        green: "#22783C",
+        amber: "#B8762E",
+        red: "#C0392B",
+      }[highlight]
+    : "inherit";
 
   return (
     <div
