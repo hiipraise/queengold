@@ -361,22 +361,22 @@ export default function WatchesClient() {
           <div className="flex flex-col items-center gap-6">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={`/api/admin/qr?sn=${encodeURIComponent(qrSerial)}`}
+              src={qrCodeUrl(qrSerial, QR_PREVIEW_SIZE)}
               alt={`QR code for ${qrSerial}`}
               className="rounded-sm"
               width={240}
               height={240}
             />
             <a
-              href={`/api/admin/qr?sn=${encodeURIComponent(qrSerial)}`}
-              download={`qr-${qrSerial}.png`}
+              href={qrCodeUrl(qrSerial)}
+              download={`qr-${qrSerial}-${QR_DOWNLOAD_SIZE}px.png`}
               className="btn-gold px-8 h-10 text-xs rounded-sm inline-flex items-center"
             >
-              Download QR
+              Download High-Res PNG
             </a>
             <p className="font-body text-xs text-center"
                style={{ color: "var(--text-muted)" }}>
-              Links to: /verify?sn={qrSerial}
+              High-resolution PNG export for print use. Links to: /verify?sn={qrSerial}
             </p>
           </div>
         </Modal>
@@ -427,6 +427,18 @@ function Field({ label, children, required }: { label: string; children: React.R
       {children}
     </div>
   );
+}
+
+const QR_PREVIEW_SIZE = 480;
+const QR_DOWNLOAD_SIZE = 1600;
+
+function qrCodeUrl(serial: string, size = QR_DOWNLOAD_SIZE) {
+  const params = new URLSearchParams({
+    sn: serial,
+    size: String(size),
+  });
+
+  return `/api/admin/qr?${params.toString()}`;
 }
 
 function Modal({ title, children, onClose }: { title: string; children: React.ReactNode; onClose: () => void }) {

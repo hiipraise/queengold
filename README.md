@@ -166,7 +166,7 @@ queen-gold/
 | PATCH  | `/api/admin/watches/:serial`      | Update watch             |
 | DELETE | `/api/admin/watches/:serial`      | Delete watch             |
 | GET    | `/api/admin/logs`                 | View scan logs           |
-| GET    | `/api/admin/qr?sn=XXX`           | Download QR code PNG     |
+| GET    | `/api/admin/qr?sn=XXX&size=1600` | Download high-resolution QR code PNG |
 
 ---
 
