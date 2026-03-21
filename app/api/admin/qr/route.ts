@@ -3,6 +3,18 @@ import QRCode from "qrcode";
 import { requireAdmin } from "@/lib/admin-guard";
 import { normalizeSerial } from "@/lib/utils";
 
+const DEFAULT_QR_SIZE = 1600;
+const MIN_QR_SIZE = 256;
+const MAX_QR_SIZE = 2400;
+
+function parseSize(raw: string | null) {
+  const parsed = Number(raw);
+  if (!Number.isFinite(parsed)) return DEFAULT_QR_SIZE;
+
+  const rounded = Math.round(parsed);
+  return Math.min(MAX_QR_SIZE, Math.max(MIN_QR_SIZE, rounded));
+}
+
 export async function GET(request: NextRequest) {
   const { error } = await requireAdmin();
   if (error) return error;
@@ -10,6 +22,7 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const rawSerial = searchParams.get("sn") ?? "";
   const serial    = normalizeSerial(rawSerial);
+  const size      = parseSize(searchParams.get("size"));
 
   if (!serial) {
     return NextResponse.json({ error: "sn param required." }, { status: 400 });
@@ -21,7 +34,7 @@ export async function GET(request: NextRequest) {
   const dataUrl = await QRCode.toDataURL(url, {
     errorCorrectionLevel: "H",
     margin:  2,
-    width:   400,
+    width:   size,
     color: {
       dark:  "#2D0614",
       light: "#F5E6C8",
@@ -35,7 +48,7 @@ export async function GET(request: NextRequest) {
   return new NextResponse(buf, {
     headers: {
       "Content-Type":        "image/png",
-      "Content-Disposition": `attachment; filename="qr-${serial}.png"`,
+      "Content-Disposition": `attachment; filename="qr-${serial}-${size}px.png"`,
       "Cache-Control":       "public, max-age=86400",
     },
   });
