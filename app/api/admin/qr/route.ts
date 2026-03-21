@@ -3,7 +3,7 @@ import QRCode from "qrcode";
 import { requireAdmin } from "@/lib/admin-guard";
 import { normalizeSerial } from "@/lib/utils";
 
-const DEFAULT_QR_SIZE = 1600;
+const DEFAULT_QR_SIZE = 2400;
 const MIN_QR_SIZE = 256;
 const MAX_QR_SIZE = 2400;
 

@@ -226,9 +226,16 @@ export default function WatchesClient() {
                             style={{ color: "var(--gold-muted)", opacity: 0.7 }}>
                       Edit
                     </button>
-                    <button onClick={() => setQrSerial(w.serialNumber)}
-                            className="font-display text-[10px] tracking-[0.15em] uppercase transition-colors hover:opacity-100"
-                            style={{ color: "var(--gold-muted)", opacity: 0.7 }}>
+                    <button
+                      onClick={() => setQrSerial(w.serialNumber)}
+                      className="min-w-[4.5rem] h-9 px-4 inline-flex items-center justify-center rounded-sm font-display text-xs tracking-[0.18em] uppercase transition-all hover:opacity-100"
+                      style={{
+                        color: "var(--gold-light)",
+                        opacity: 0.92,
+                        border: "1px solid rgba(212,175,55,0.45)",
+                        background: "rgba(212,175,55,0.08)",
+                      }}
+                    >
                       QR
                     </button>
                     <button onClick={() => handleDelete(w.serialNumber)}
@@ -363,16 +370,17 @@ export default function WatchesClient() {
             <img
               src={qrCodeUrl(qrSerial, QR_PREVIEW_SIZE)}
               alt={`QR code for ${qrSerial}`}
-              className="rounded-sm"
-              width={240}
-              height={240}
+              className="rounded-sm w-60 h-60 sm:w-72 sm:h-72"
+              style={{ imageRendering: "pixelated" }}
+              width={288}
+              height={288}
             />
             <a
               href={qrCodeUrl(qrSerial)}
               download={`qr-${qrSerial}-${QR_DOWNLOAD_SIZE}px.png`}
-              className="btn-gold px-8 h-10 text-xs rounded-sm inline-flex items-center"
+              className="btn-gold px-8 h-11 text-xs rounded-sm inline-flex items-center justify-center text-center"
             >
-              Download High-Res PNG
+              Download High-Res PNG ({QR_DOWNLOAD_SIZE}px)
             </a>
             <p className="font-body text-xs text-center"
                style={{ color: "var(--text-muted)" }}>
@@ -430,7 +438,7 @@ function Field({ label, children, required }: { label: string; children: React.R
 }
 
 const QR_PREVIEW_SIZE = 480;
-const QR_DOWNLOAD_SIZE = 1600;
+const QR_DOWNLOAD_SIZE = 2400;
 
 function qrCodeUrl(serial: string, size = QR_DOWNLOAD_SIZE) {
   const params = new URLSearchParams({
