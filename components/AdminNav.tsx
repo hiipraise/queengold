@@ -16,6 +16,7 @@ export default function AdminNav({ userName }: Props) {
   const [signingOut, setSigningOut] = useState(false);
 
   const links = [
+    { href: "/admin/commerce", label: "Commerce" },
     { href: "/admin/watches", label: "Watches" },
     { href: "/admin/logs",    label: "Scan Logs" },
     { href: "/admin/account", label: "Account" },
@@ -40,7 +41,7 @@ export default function AdminNav({ userName }: Props) {
       }}
     >
       {/* Logo */}
-      <Link href="/admin/watches" aria-label="Queen Gold Admin">
+      <Link href="/admin/commerce" aria-label="Queen Gold Admin">
         <QueenGoldLogo size="sm" />
       </Link>
 

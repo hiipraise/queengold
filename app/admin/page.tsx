@@ -1,6 +1,2 @@
-// app/admin/page.tsx
 import { redirect } from "next/navigation";
-
-export default function AdminPage() {
-  redirect("/admin/watches");
-}
+export default function AdminPage() { redirect("/admin/commerce"); }

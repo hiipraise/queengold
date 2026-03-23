@@ -1,45 +1,25 @@
-// app/layout.tsx
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import SiteHeader from "@/components/SiteHeader";
+import CartDrawer from "@/components/CartDrawer";
+import { StoreProvider } from "@/lib/store";
 
 export const metadata: Metadata = {
-  title: {
-    default:  "Queen Gold — Authentic Luxury Timepieces",
-    template: "%s | Queen Gold",
-  },
-  description:
-    "Verify the authenticity of your Queen Gold timepiece with our Digital Watch Passport system.",
-  robots: { index: true, follow: true },
-  openGraph: {
-    siteName: "Queen Gold",
-    locale:   "en_GB",
-    type:     "website",
-  },
+  title: { default: "Queen Gold — Luxury Watch Ecommerce", template: "%s | Queen Gold" },
+  description: "Premium luxury wristwatch ecommerce experience with digital passport verification, concierge shopping, and protected admin operations.",
 };
 
-export const viewport: Viewport = {
-  width:        "device-width",
-  initialScale: 1,
-  themeColor:   "#2D0614",
-};
+export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#2D0614" };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Cormorant+SC:wght@300;400;500;600&family=Jost:wght@300;400;500;600&display=swap"
-          rel="stylesheet"
-        />
-      </head>
+    <html lang="en">
       <body className="antialiased">
-        {children}
+        <StoreProvider>
+          <SiteHeader />
+          {children}
+          <CartDrawer />
+        </StoreProvider>
       </body>
     </html>
   );
