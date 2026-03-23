@@ -1,0 +1,24 @@
+"use client";
+import { useState } from "react";
+import Link from "next/link";
+import { products, promotions } from "@/lib/site-data";
+import { useStore } from "@/lib/store";
+import { discountedPrice, formatCurrency } from "@/lib/shop-utils";
+
+export default function CheckoutClient() {
+  const { cart, cartSubtotal } = useStore();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  async function handleCheckout() {
+    setLoading(true); setError("");
+    const res = await fetch('/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ items: cart, customer: { email: 'amina.cole@example.com', firstName: 'Amina', lastName: 'Cole' } }) });
+    const data = await res.json();
+    setLoading(false);
+    if (!res.ok) return setError(data.error ?? 'Unable to initialize payment.');
+    window.location.href = data.checkoutUrl;
+  }
+  const items = cart.map((item) => ({ ...item, product: products.find((entry) => entry.slug === item.slug) })).filter((item) => item.product);
+  return <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8"><div className="grid gap-8 lg:grid-cols-[1fr_420px]"><section className="space-y-6"><div><p className="text-xs uppercase tracking-[0.35em] text-[var(--gold-muted)]">Checkout</p><h1 className="font-serif text-5xl">Private client checkout.</h1><p className="mt-4 max-w-2xl text-sm text-[var(--text-muted)]">A luxury-ready checkout with saved address details, concierge notes, promotions, and Squad payment handoff.</p></div><div className="card-luxury grid gap-4 p-6 sm:grid-cols-2"><Field label="Email" value="amina.cole@example.com" /><Field label="Shipping" value="14 Admiralty Way, Lekki, Lagos" /><Field label="Delivery" value="Insured priority dispatch" /><Field label="Passport setup" value="Enabled on fulfillment" /></div><div className="card-luxury p-6"><h2 className="font-serif text-2xl">Promotions</h2><div className="mt-4 grid gap-3">{promotions.map((promo) => <div key={promo.code} className="rounded-[1.5rem] border border-[var(--border-gold)] p-4"><p className="text-xs uppercase tracking-[0.22em] text-[var(--gold-muted)]">{promo.code}</p><p className="mt-2 font-serif text-xl">{promo.title}</p><p className="mt-2 text-sm text-[var(--text-muted)]">{promo.detail}</p></div>)}</div></div><div className="card-luxury p-6"><h2 className="font-serif text-2xl">Payment</h2><p className="mt-3 text-sm text-[var(--text-muted)]">This flow prepares a Squad transaction payload with customer, amount, redirect URLs, and metadata suitable for server-side verification on return.</p><div className="mt-4 flex flex-wrap gap-3"><button onClick={handleCheckout} disabled={!items.length || loading} className="btn-gold h-12 rounded-full px-6 text-sm">{loading ? 'Initializing…' : 'Pay with Squad'}</button><Link href="/payment/cancel" className="flex h-12 items-center justify-center rounded-full border border-[var(--border-gold)] px-6 text-sm uppercase tracking-[0.2em]">Cancel flow</Link></div>{error ? <p className="mt-3 text-sm text-rose-200">{error}</p> : null}</div></section><aside className="card-luxury h-fit p-6"><h2 className="font-serif text-3xl">Order Summary</h2><div className="mt-5 space-y-4">{items.length === 0 ? <p className="text-sm text-[var(--text-muted)]">Your cart is empty. Add a watch to continue.</p> : items.map(({ slug, quantity, product }) => product ? <div key={slug} className="flex items-center gap-4"><div className="h-16 w-16 rounded-2xl bg-cover bg-center" style={{ backgroundImage: `url(${product.images[0]})` }} /><div className="flex-1"><p className="font-serif text-lg">{product.name}</p><p className="text-xs uppercase tracking-[0.2em] text-[var(--text-muted)]">Qty {quantity}</p></div><p className="text-sm">{formatCurrency(discountedPrice(product.price, product.discountPercentage) * quantity)}</p></div> : null)}</div><div className="mt-6 space-y-3 border-t border-[var(--border-gold)] pt-5"><Price label="Subtotal" value={formatCurrency(cartSubtotal)} /><Price label="Insured Shipping" value="Included" /><Price label="Passport Activation" value="Included" /><Price label="Total" value={formatCurrency(cartSubtotal)} strong /></div></aside></div></main>;
+}
+function Field({ label, value }: { label: string; value: string }) { return <div className="rounded-[1.5rem] border border-[var(--border-gold)] p-4"><p className="text-xs uppercase tracking-[0.22em] text-[var(--gold-muted)]">{label}</p><p className="mt-2 text-sm text-[var(--gold-light)]">{value}</p></div>; }
+function Price({ label, value, strong = false }: { label: string; value: string; strong?: boolean }) { return <div className={`flex items-center justify-between ${strong ? 'font-serif text-2xl' : 'text-sm'}`}><span className="text-[var(--text-muted)]">{label}</span><span>{value}</span></div>; }

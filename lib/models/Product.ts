@@ -1,0 +1,3 @@
+import mongoose, { Schema } from "mongoose";
+const ProductSchema = new Schema({ name: String, slug: { type: String, unique: true }, sku: String, serialNumber: String, price: Number, discountPercentage: Number, stock: Number, category: String, collection: String, description: String, story: String, specs: [{ label: String, value: String }], movement: String, material: String, warranty: String, badge: String, featured: Boolean, bestSeller: Boolean, newArrival: Boolean, images: [String] }, { timestamps: true });
+export const Product = mongoose.models.Product ?? mongoose.model("Product", ProductSchema);
