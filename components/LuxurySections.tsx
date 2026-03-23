@@ -1,60 +1,34 @@
 "use client";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { bestSellers, categories, collections, featuredProducts, newArrivals, trustHighlights } from "@/lib/site-data";
-import { discountedPrice, formatCurrency } from "@/lib/shop-utils";
 import { useStore } from "@/lib/store";
+import { discountedPrice, formatCurrency } from "@/lib/shop-utils";
+import { getCloudinaryImage } from "@/lib/cloudinary";
 
-export function HeroSection() {
-  return (
-    <section className="relative overflow-hidden px-4 pt-10 sm:px-6 lg:px-8">
-      <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1.1fr_.9fr] lg:items-center">
-        <motion.div className="space-y-8">
-          <p className="text-xs uppercase tracking-[0.45em] text-[var(--gold-muted)]">Luxury timepieces · ecommerce maison</p>
-          <h1 className="font-serif text-5xl leading-tight sm:text-6xl lg:text-7xl">Curated wristwatch commerce with <span className="text-gold-gradient">digital trust</span>.</h1>
-          <p className="max-w-2xl text-lg text-[var(--text-muted)]">Queen Gold now pairs its authenticity passport system with concierge shopping, premium collections, and a polished end-to-end luxury checkout journey.</p>
-          <div className="flex flex-wrap gap-4">
-            <Link href="/shop" className="btn-gold flex h-14 items-center justify-center rounded-full px-8 text-sm">Shop Collection</Link>
-            <Link href="/verify" className="flex h-14 items-center justify-center rounded-full border border-[var(--border-gold)] px-8 text-sm uppercase tracking-[0.24em] text-[var(--gold-light)]">Verify a Watch</Link>
-          </div>
-        </motion.div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          {featuredProducts.slice(0, 2).map((product, index) => (
-            <div key={product.slug} className={`card-luxury relative min-h-[260px] overflow-hidden p-5 ${index === 0 ? 'sm:col-span-2' : ''}`}>
-              <div className="absolute inset-0 bg-cover bg-center opacity-40" style={{ backgroundImage: `url(${product.images[0]})` }} />
-              <div className="relative flex h-full flex-col justify-end">
-                <p className="text-xs uppercase tracking-[0.3em] text-[var(--gold-muted)]">{product.collection}</p>
-                <h2 className="font-serif text-3xl">{product.name}</h2>
-                <p className="mt-2 text-sm text-[var(--text-muted)]">{product.description}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
+type Product = { slug: string; name: string; category: string; collection: string; description: string; badge?: string; price: number; discountPercentage?: number; images: string[] };
+type Category = { slug: string; name: string; description: string };
+type Collection = { slug: string; name: string; tagline: string; description: string };
+
+export function HeroSection({ featuredProducts }: { featuredProducts: Product[] }) {
+  return <section className="relative overflow-hidden px-4 pt-10 sm:px-6 lg:px-8"><div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1.1fr_.9fr] lg:items-center"><motion.div className="space-y-8"><p className="text-xs uppercase tracking-[0.45em] text-[var(--gold-muted)]">Luxury timepieces · ecommerce maison</p><h1 className="font-serif text-5xl leading-tight sm:text-6xl lg:text-7xl">Curated wristwatch commerce with <span className="text-gold-gradient">digital trust</span>.</h1><p className="max-w-2xl text-lg text-[var(--text-muted)]">Live inventory, Mongo-backed checkout, and authenticated digital passport verification.</p><div className="flex flex-wrap gap-4"><Link href="/shop" className="btn-gold flex h-14 items-center justify-center rounded-full px-8 text-sm">Shop Collection</Link><Link href="/verify" className="flex h-14 items-center justify-center rounded-full border border-[var(--border-gold)] px-8 text-sm uppercase tracking-[0.24em] text-[var(--gold-light)]">Verify a Watch</Link></div></motion.div><div className="grid gap-4 sm:grid-cols-2">{featuredProducts.slice(0, 2).map((product, index) => <div key={product.slug} className={`card-luxury relative min-h-[260px] overflow-hidden p-5 ${index === 0 ? 'sm:col-span-2' : ''}`}><div className="absolute inset-0 bg-cover bg-center opacity-40" style={{ backgroundImage: `url(${getCloudinaryImage(product.images[0], { width: 1200, height: 800 })})` }} /><div className="relative flex h-full flex-col justify-end"><p className="text-xs uppercase tracking-[0.3em] text-[var(--gold-muted)]">{product.collection}</p><h2 className="font-serif text-3xl">{product.name}</h2><p className="mt-2 text-sm text-[var(--text-muted)]">{product.description}</p></div></div>)}</div></div></section>;
 }
 
 export function TrustStrip() {
+  const trustHighlights = [
+    { title: 'Live Inventory', text: 'Shop pages and checkout both query MongoDB at request time to avoid stale product data.' },
+    { title: 'Persistent Wishlist', text: 'Saved products are tied to a customer email and persisted in the database.' },
+    { title: 'Checkout Records', text: 'Orders and payment attempts are stored before redirecting to the payment provider.' },
+  ];
   return <section className="mx-auto grid max-w-7xl gap-4 px-4 py-10 sm:px-6 lg:grid-cols-3 lg:px-8">{trustHighlights.map((item) => <div key={item.title} className="card-luxury p-6"><p className="font-display text-xs uppercase tracking-[0.3em] text-[var(--gold-muted)]">Trust</p><h3 className="mt-3 font-serif text-2xl">{item.title}</h3><p className="mt-3 text-sm text-[var(--text-muted)]">{item.text}</p></div>)}</section>;
 }
 
-export function ProductRail({ title, subtitle, items = featuredProducts }: { title: string; subtitle: string; items?: typeof featuredProducts }) {
+export function ProductRail({ title, subtitle, items }: { title: string; subtitle: string; items: Product[] }) {
   const { addToCart, toggleWishlist } = useStore();
-  return <section className="space-y-5 px-4 py-10 sm:px-6 lg:px-8">
-    <div className="mx-auto flex max-w-7xl items-end justify-between gap-6"><div><p className="text-xs uppercase tracking-[0.35em] text-[var(--gold-muted)]">Curated selection</p><h2 className="font-serif text-4xl">{title}</h2><p className="mt-2 max-w-2xl text-sm text-[var(--text-muted)]">{subtitle}</p></div><Link href="/shop" className="text-xs uppercase tracking-[0.24em] text-[var(--gold-light)]">View all</Link></div>
-    <div className="scrollbar-thin mx-auto flex max-w-7xl gap-4 overflow-x-auto pb-2">{items.map((product) => <article key={product.slug} className="card-luxury min-w-[280px] max-w-[320px] flex-1 overflow-hidden"><Link href={`/product/${product.slug}`} className="block h-72 bg-cover bg-center" style={{ backgroundImage: `url(${product.images[0]})` }} /><div className="space-y-3 p-5"><div className="flex items-start justify-between gap-4"><div><p className="text-xs uppercase tracking-[0.28em] text-[var(--gold-muted)]">{product.category}</p><h3 className="font-serif text-2xl">{product.name}</h3></div>{product.badge && <span className="rounded-full border border-[var(--border-gold)] px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-[var(--gold-light)]">{product.badge}</span>}</div><p className="text-sm text-[var(--text-muted)]">{product.description}</p><div className="flex items-center justify-between"><div><p className="text-xs uppercase tracking-[0.24em] text-[var(--text-muted)]">From</p><p className="font-serif text-2xl">{formatCurrency(discountedPrice(product.price, product.discountPercentage))}</p></div><div className="flex gap-2"><button onClick={() => toggleWishlist(product.slug)} className="rounded-full border border-[var(--border-gold)] px-4 py-2 text-xs uppercase tracking-[0.2em]">Save</button><button onClick={() => addToCart(product.slug)} className="btn-gold rounded-full px-4 py-2 text-xs">Add</button></div></div></div></article>)}</div>
-  </section>;
+  return <section className="space-y-5 px-4 py-10 sm:px-6 lg:px-8"><div className="mx-auto flex max-w-7xl items-end justify-between gap-6"><div><p className="text-xs uppercase tracking-[0.35em] text-[var(--gold-muted)]">Curated selection</p><h2 className="font-serif text-4xl">{title}</h2><p className="mt-2 max-w-2xl text-sm text-[var(--text-muted)]">{subtitle}</p></div><Link href="/shop" className="text-xs uppercase tracking-[0.24em] text-[var(--gold-light)]">View all</Link></div><div className="scrollbar-thin mx-auto flex max-w-7xl gap-4 overflow-x-auto pb-2">{items.map((product) => <article key={product.slug} className="card-luxury min-w-[280px] max-w-[320px] flex-1 overflow-hidden"><Link href={`/product/${product.slug}`} className="block h-72 bg-cover bg-center" style={{ backgroundImage: `url(${getCloudinaryImage(product.images[0], { width: 720, height: 720 })})` }} /><div className="space-y-3 p-5"><div className="flex items-start justify-between gap-4"><div><p className="text-xs uppercase tracking-[0.28em] text-[var(--gold-muted)]">{product.category}</p><h3 className="font-serif text-2xl">{product.name}</h3></div>{product.badge && <span className="rounded-full border border-[var(--border-gold)] px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-[var(--gold-light)]">{product.badge}</span>}</div><p className="text-sm text-[var(--text-muted)]">{product.description}</p><div className="flex items-center justify-between"><div><p className="text-xs uppercase tracking-[0.24em] text-[var(--text-muted)]">From</p><p className="font-serif text-2xl">{formatCurrency(discountedPrice(product.price, product.discountPercentage))}</p></div><div className="flex gap-2"><button onClick={() => toggleWishlist(product.slug)} className="rounded-full border border-[var(--border-gold)] px-4 py-2 text-xs uppercase tracking-[0.2em]">Save</button><button onClick={() => addToCart(product.slug)} className="btn-gold rounded-full px-4 py-2 text-xs">Add</button></div></div></div></article>)}</div></section>;
 }
 
-export function CollectionShowcase() {
-  return <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8"><div className="mb-6"><p className="text-xs uppercase tracking-[0.35em] text-[var(--gold-muted)]">Collections</p><h2 className="font-serif text-4xl">Explore the house signatures.</h2></div><div className="grid gap-5 lg:grid-cols-3">{collections.map((collection) => <Link key={collection.slug} href={`/collections/${collection.slug}`} className="card-luxury group min-h-[320px] p-6 transition hover:-translate-y-1"><p className="text-xs uppercase tracking-[0.28em] text-[var(--gold-muted)]">{collection.tagline}</p><h3 className="mt-4 font-serif text-3xl">{collection.name}</h3><p className="mt-4 text-sm text-[var(--text-muted)]">{collection.description}</p><span className="mt-10 inline-flex text-xs uppercase tracking-[0.28em] text-[var(--gold-light)]">Discover</span></Link>)}</div></section>;
-}
+export function CollectionShowcase({ collections }: { collections: Collection[] }) { return <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8"><div className="mb-6"><p className="text-xs uppercase tracking-[0.35em] text-[var(--gold-muted)]">Collections</p><h2 className="font-serif text-4xl">Explore the house signatures.</h2></div><div className="grid gap-5 lg:grid-cols-3">{collections.map((collection) => <Link key={collection.slug} href={`/collections/${collection.slug}`} className="card-luxury group min-h-[320px] p-6 transition hover:-translate-y-1"><p className="text-xs uppercase tracking-[0.28em] text-[var(--gold-muted)]">{collection.tagline}</p><h3 className="mt-4 font-serif text-3xl">{collection.name}</h3><p className="mt-4 text-sm text-[var(--text-muted)]">{collection.description}</p><span className="mt-10 inline-flex text-xs uppercase tracking-[0.28em] text-[var(--gold-light)]">Discover</span></Link>)}</div></section>; }
 
-export function CategoryGrid() {
-  return <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8"><div className="mb-6"><p className="text-xs uppercase tracking-[0.35em] text-[var(--gold-muted)]">Categories</p><h2 className="font-serif text-4xl">Shop by style, lifestyle, and rarity.</h2></div><div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">{categories.map((category) => <Link key={category.slug} href={`/categories/${category.slug}`} className="card-luxury min-h-[180px] p-5"><h3 className="font-serif text-2xl">{category.name}</h3><p className="mt-3 text-sm text-[var(--text-muted)]">{category.description}</p></Link>)}</div></section>;
-}
+export function CategoryGrid({ categories }: { categories: Category[] }) { return <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8"><div className="mb-6"><p className="text-xs uppercase tracking-[0.35em] text-[var(--gold-muted)]">Categories</p><h2 className="font-serif text-4xl">Shop by style, lifestyle, and rarity.</h2></div><div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">{categories.map((category) => <Link key={category.slug} href={`/categories/${category.slug}`} className="card-luxury min-h-[180px] p-5"><h3 className="font-serif text-2xl">{category.name}</h3><p className="mt-3 text-sm text-[var(--text-muted)]">{category.description}</p></Link>)}</div></section>; }
 
-export function EditorialBand() {
-  return <section className="mx-auto grid max-w-7xl gap-6 px-4 py-12 sm:px-6 lg:grid-cols-[1.2fr_.8fr] lg:px-8"><div className="card-luxury p-8"><p className="text-xs uppercase tracking-[0.35em] text-[var(--gold-muted)]">Concierge checkout</p><h2 className="mt-3 font-serif text-4xl">Payments, insurance, and verification woven into one premium flow.</h2><p className="mt-4 max-w-2xl text-sm text-[var(--text-muted)]">From cart drawer to Squad payment handoff and post-purchase digital passport confirmation, the experience is designed to reassure high-intent luxury buyers at every step.</p></div><div className="space-y-4">{[{t:'Best Sellers',i:bestSellers},{t:'New Arrivals',i:newArrivals}].map(({t,i}) => <div key={t} className="card-luxury p-6"><p className="text-xs uppercase tracking-[0.28em] text-[var(--gold-muted)]">{t}</p><p className="mt-3 font-serif text-2xl">{i.map((item) => item.name).join(' · ')}</p></div>)}</div></section>;
-}
+export function EditorialBand({ bestSellers, newArrivals }: { bestSellers: Product[]; newArrivals: Product[] }) { return <section className="mx-auto grid max-w-7xl gap-6 px-4 py-12 sm:px-6 lg:grid-cols-[1.2fr_.8fr] lg:px-8"><div className="card-luxury p-8"><p className="text-xs uppercase tracking-[0.35em] text-[var(--gold-muted)]">Concierge checkout</p><h2 className="mt-3 font-serif text-4xl">Payments, insurance, and verification woven into one premium flow.</h2><p className="mt-4 max-w-2xl text-sm text-[var(--text-muted)]">Every order is created from live product records before payment initialization, so pricing and availability stay in sync.</p></div><div className="space-y-4">{[{t:'Best Sellers',i:bestSellers},{t:'New Arrivals',i:newArrivals}].map(({t,i}) => <div key={t} className="card-luxury p-6"><p className="text-xs uppercase tracking-[0.28em] text-[var(--gold-muted)]">{t}</p><p className="mt-3 font-serif text-2xl">{i.map((item) => item.name).join(' · ')}</p></div>)}</div></section>; }

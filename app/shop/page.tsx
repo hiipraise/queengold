@@ -1,6 +1,9 @@
 import ShopClient from "@/components/ShopClient";
-import { categories, collections, products } from "@/lib/site-data";
+import { getProductSummaries } from "@/lib/catalog";
 
-export default function ShopPage() {
-  return <ShopClient products={products} categories={categories} collections={collections} heading="All Watches" description="Browse every Queen Gold reference with premium filtering, sorting, search, and availability controls." />;
+export const dynamic = "force-dynamic";
+
+export default async function ShopPage() {
+  const { products, categories, collections } = await getProductSummaries();
+  return <ShopClient products={products as any} categories={categories as any} collections={collections as any} heading="All Watches" description="Browse every Queen Gold reference with live pricing, filtering, and availability controls." />;
 }
