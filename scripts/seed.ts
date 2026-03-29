@@ -1,11 +1,3 @@
-/**
- * Seed script — run once to bootstrap the database.
- *
- * Usage:
- *   cp .env.example .env.local          # fill in MONGODB_URI, ADMIN_EMAIL, ADMIN_PASSWORD
- *   npx tsx scripts/seed.ts
- */
-
 import "dotenv/config";
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
@@ -19,139 +11,103 @@ if (!MONGODB_URI) {
   process.exit(1);
 }
 
-/* ─── Inline schema definitions (avoid Next.js module resolution) ─────────── */
+const CategorySchema = new mongoose.Schema({ name: String, slug: { type: String, unique: true }, description: String, gender: String, type: String, heroImage: String, isFeatured: Boolean }, { timestamps: true });
+const CollectionSchema = new mongoose.Schema({ name: String, slug: { type: String, unique: true }, description: String, bannerImage: String }, { timestamps: true });
+const ProductSchema = new mongoose.Schema({ name: String, slug: { type: String, unique: true }, sku: { type: String, unique: true }, shortDescription: String, description: String, price: Number, discountPrice: Number, stock: Number, images: [String], categoryId: { type: mongoose.Schema.Types.ObjectId, ref: "Category" }, collectionIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "Collection" }], gender: String, type: String, specs: { type: Map, of: String }, movementDetails: String, materialDetails: String, warrantyInfo: String, featuredFlags: { featured: Boolean, newArrival: Boolean, bestSeller: Boolean, limited: Boolean } }, { timestamps: true });
+const WatchSchema = new mongoose.Schema({ serialNumber: { type: String, unique: true }, model: String, collection: String, movement: String, status: String, warrantyStatus: String, dateOfPurchase: Date, dealer: String, scanCount: Number, firstScannedAt: Date, lastScannedAt: Date }, { timestamps: true });
+const AdminSchema = new mongoose.Schema({ email: { type: String, unique: true }, passwordHash: String, name: String, role: String }, { timestamps: true });
 
-const WatchSchema = new mongoose.Schema(
-  {
-    serialNumber: {
-      type: String,
-      required: true,
-      unique: true,
-      uppercase: true,
-      trim: true,
-    },
-    model: { type: String, default: "QG-ER-01" },
-    collection: { type: String, default: "Eternal Reign" },
-    movement: { type: String, default: "CROWNCALIBRE™ CC-01" },
-    status: {
-      type: String,
-      enum: ["unregistered", "registered", "sold"],
-      default: "unregistered",
-    },
-    warrantyStatus: {
-      type: String,
-      enum: ["active", "expired", "void"],
-      default: "active",
-    },
-    dateOfPurchase: { type: Date, default: null },
-    dealer: { type: String, default: "Queen Gold Lagos" },
-    scanCount: { type: Number, default: 0 },
-    firstScannedAt: { type: Date, default: null },
-    lastScannedAt: { type: Date, default: null },
-  },
-  { timestamps: true },
-);
-
-const AdminSchema = new mongoose.Schema(
-  {
-    email: { type: String, required: true, unique: true, lowercase: true },
-    passwordHash: { type: String, required: true },
-    name: { type: String, default: "Admin" },
-    role: { type: String, enum: ["admin", "superadmin"], default: "admin" },
-  },
-  { timestamps: true },
-);
-
+const Category = mongoose.models.Category ?? mongoose.model("Category", CategorySchema);
+const Collection = mongoose.models.Collection ?? mongoose.model("Collection", CollectionSchema);
+const Product = mongoose.models.Product ?? mongoose.model("Product", ProductSchema);
 const Watch = mongoose.models.Watch ?? mongoose.model("Watch", WatchSchema);
-
 const Admin = mongoose.models.Admin ?? mongoose.model("Admin", AdminSchema);
 
-/* ─── Sample watches ──────────────────────────────────────────────────────── */
-const SAMPLE_WATCHES = [
-  {
-    serialNumber: "Q04R7254",
-    model: "QG-ER-01",
-    collection: "Eternal Reign",
-    movement: "CROWNCALIBRE™ CC-01",
-    status: "sold",
-    warrantyStatus: "active",
-    dateOfPurchase: new Date("2024-11-12"),
-    dealer: "Queen Gold Lagos",
-  },
-  {
-    serialNumber: "Q04R7255",
-    model: "QG-ER-01",
-    collection: "Eternal Reign",
-    movement: "CROWNCALIBRE™ CC-01",
-    status: "registered",
-    warrantyStatus: "active",
-    dateOfPurchase: new Date("2024-12-06"),
-    dealer: "Queen Gold Lagos",
-  },
-  {
-    serialNumber: "Q04R7300",
-    model: "QG-ER-02",
-    collection: "Eternal Reign",
-    movement: "CROWNCALIBRE™ CC-01",
-    status: "unregistered",
-    warrantyStatus: "active",
-    dateOfPurchase: null,
-    dealer: "Queen Gold Lagos",
-  },
+const CATEGORIES = [
+  ["Men’s Watches", "mens-watches", "men", "luxury"],
+  ["Women’s Watches", "womens-watches", "women", "classic"],
+  ["Unisex", "unisex", "unisex", "sport"],
+  ["Classic", "classic", "unisex", "classic"],
+  ["Sport", "sport", "unisex", "sport"],
+  ["Luxury", "luxury", "unisex", "luxury"],
+  ["Limited Edition", "limited-edition", "unisex", "limited-edition"],
+  ["New Arrivals", "new-arrivals", "unisex", "new-arrivals"],
+  ["Best Sellers", "best-sellers", "unisex", "best-sellers"],
+  ["Signature Collection", "signature-collection", "unisex", "signature"],
 ];
 
-/* ─── Main ────────────────────────────────────────────────────────────────── */
+const COLLECTIONS = [
+  ["Imperial Legacy", "imperial-legacy", "Polished gold architecture with modern precision."],
+  ["Aurum Sport", "aurum-sport", "High-performance chronographs for active luxury."],
+  ["Noir Signature", "noir-signature", "Black-gold aesthetics for private collectors."],
+];
+
 async function seed() {
-  console.log("Connecting to MongoDB…");
   await mongoose.connect(MONGODB_URI, { bufferCommands: false });
-  console.log("Connected.");
 
-  /* Ensure indexes */
-  await Watch.createIndexes();
-  await Admin.createIndexes();
-  console.log("Indexes ensured.");
-
-  /* Admin user */
-  const existing = await Admin.findOne({ email: ADMIN_EMAIL.toLowerCase() });
-  if (existing) {
-    console.log(`Admin '${ADMIN_EMAIL}' already exists — skipping.`);
-  } else {
-    const hash = await bcrypt.hash(ADMIN_PASSWORD, 12);
-    await Admin.create({
-      email: ADMIN_EMAIL.toLowerCase(),
-      passwordHash: hash,
-      name: "Queen Gold Admin",
-      role: "superadmin",
-    });
-    console.log(`Admin created: ${ADMIN_EMAIL}`);
+  const existingAdmin = await Admin.findOne({ email: ADMIN_EMAIL.toLowerCase() });
+  if (!existingAdmin) {
+    await Admin.create({ email: ADMIN_EMAIL.toLowerCase(), passwordHash: await bcrypt.hash(ADMIN_PASSWORD, 12), name: "Queen Gold Admin", role: "superadmin" });
   }
 
-  /* Sample watches */
-  let created = 0;
-  let skipped = 0;
-  for (const w of SAMPLE_WATCHES) {
-    try {
-      await Watch.create(w);
-      created++;
-      console.log(`  Watch created: ${w.serialNumber}`);
-    } catch (err: unknown) {
-      if ((err as { code?: number }).code === 11000) {
-        skipped++;
-        console.log(`  Watch skipped (duplicate): ${w.serialNumber}`);
-      } else {
-        throw err;
-      }
-    }
+  const categoryMap = new Map<string, any>();
+  for (const [name, slug, gender, type] of CATEGORIES) {
+    const c = await Category.findOneAndUpdate({ slug }, { name, slug, gender, type, description: `${name} collection`, isFeatured: true }, { upsert: true, new: true });
+    categoryMap.set(slug as string, c);
   }
 
-  console.log(
-    `\nSeed complete. Watches: ${created} created, ${skipped} skipped.`,
-  );
+  const collectionMap = new Map<string, any>();
+  for (const [name, slug, description] of COLLECTIONS) {
+    const c = await Collection.findOneAndUpdate({ slug }, { name, slug, description }, { upsert: true, new: true });
+    collectionMap.set(slug as string, c);
+  }
+
+  const catalog = [
+    { name: "Sovereign Chronometer 41", slug: "sovereign-chronometer-41", sku: "QG-SC-041", price: 5200000, discountPrice: 4850000, stock: 7, gender: "men", type: "luxury", category: "mens-watches", collection: "imperial-legacy", flags: { featured: true, newArrival: false, bestSeller: true, limited: false } },
+    { name: "Seraphine Moonphase 36", slug: "seraphine-moonphase-36", sku: "QG-SM-036", price: 4700000, stock: 9, gender: "women", type: "classic", category: "womens-watches", collection: "imperial-legacy", flags: { featured: true, newArrival: true, bestSeller: true, limited: false } },
+    { name: "Regatta Titanium Diver", slug: "regatta-titanium-diver", sku: "QG-RT-042", price: 3900000, stock: 12, gender: "unisex", type: "sport", category: "sport", collection: "aurum-sport", flags: { featured: true, newArrival: true, bestSeller: false, limited: false } },
+    { name: "Noir Crown Tourbillon", slug: "noir-crown-tourbillon", sku: "QG-NC-040", price: 8750000, stock: 3, gender: "unisex", type: "limited-edition", category: "limited-edition", collection: "noir-signature", flags: { featured: true, newArrival: false, bestSeller: false, limited: true } },
+  ];
+
+  for (const item of catalog) {
+    await Product.findOneAndUpdate(
+      { slug: item.slug },
+      {
+        name: item.name,
+        slug: item.slug,
+        sku: item.sku,
+        shortDescription: "Hand-finished Swiss movement with Queen Gold signature detailing.",
+        description: `${item.name} blends fine watchmaking with bold luxury craftsmanship for discerning collectors.`,
+        price: item.price,
+        discountPrice: item.discountPrice,
+        stock: item.stock,
+        images: [
+          "https://images.unsplash.com/photo-1523170335258-f5ed11844a49?q=80&w=1200&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1619134778706-7015533a6150?q=80&w=1200&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1547996160-81dfa63595aa?q=80&w=1200&auto=format&fit=crop",
+        ],
+        categoryId: categoryMap.get(item.category)?._id,
+        collectionIds: [collectionMap.get(item.collection)?._id],
+        gender: item.gender,
+        type: item.type,
+        specs: { caseSize: "41mm", waterResistance: "100m", crystal: "Sapphire", caliber: "CROWNCALIBRE CC-01" },
+        movementDetails: "Automatic Swiss movement with 72-hour reserve.",
+        materialDetails: "18k gold bezel, brushed titanium case, alligator leather strap.",
+        warrantyInfo: "5-year Queen Gold international warranty with digital passport support.",
+        featuredFlags: item.flags,
+      },
+      { upsert: true, new: true },
+    );
+  }
+
+  await Watch.findOneAndUpdate({ serialNumber: "Q04R7254" }, { serialNumber: "Q04R7254", model: "QG-SC-041", collection: "Imperial Legacy", movement: "CROWNCALIBRE™ CC-01", status: "sold", warrantyStatus: "active", dateOfPurchase: new Date("2025-11-12"), dealer: "Queen Gold Lagos", scanCount: 2, firstScannedAt: new Date("2025-11-14"), lastScannedAt: new Date("2026-01-03") }, { upsert: true });
+  await Watch.findOneAndUpdate({ serialNumber: "Q04R7255" }, { serialNumber: "Q04R7255", model: "QG-SM-036", collection: "Imperial Legacy", movement: "CROWNCALIBRE™ CC-02", status: "registered", warrantyStatus: "active", dealer: "Queen Gold Lagos", scanCount: 1, firstScannedAt: new Date("2026-02-05"), lastScannedAt: new Date("2026-02-05") }, { upsert: true });
+
   await mongoose.disconnect();
-  process.exit(0);
+  console.log("Seed completed successfully.");
 }
 
 seed().catch((err) => {
-  console.error("Seed failed:", err);
+  console.error(err);
   process.exit(1);
 });

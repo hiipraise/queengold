@@ -19,6 +19,7 @@ export default function AdminNav({ userName }: Props) {
     { href: "/admin/watches", label: "Watches" },
     { href: "/admin/logs",    label: "Scan Logs" },
     { href: "/admin/account", label: "Account" },
+    { href: "/admin/commerce", label: "Commerce" },
     { href: "/verify",        label: "Public Verify", external: true },
   ];
 

@@ -21,6 +21,7 @@ export default function AdminLoginClient() {
       email,
       password,
       redirect: false,
+      userType: "admin",
     });
 
     if (res?.ok) {

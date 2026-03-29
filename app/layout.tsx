@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     template: "%s | Queen Gold",
   },
   description:
-    "Verify the authenticity of your Queen Gold timepiece with our Digital Watch Passport system.",
+    "Luxury wristwatch ecommerce platform with secure checkout and Digital Watch Passport authenticity verification.",
   robots: { index: true, follow: true },
   openGraph: {
     siteName: "Queen Gold",
