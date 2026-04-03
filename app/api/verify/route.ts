@@ -16,10 +16,10 @@ export async function GET(request: NextRequest) {
         status: 429,
         headers: {
           "X-RateLimit-Remaining": "0",
-          "X-RateLimit-Reset":     String(resetAt),
-          "Retry-After":           String(Math.ceil((resetAt - Date.now()) / 1000)),
+          "X-RateLimit-Reset": String(resetAt),
+          "Retry-After": String(Math.ceil((resetAt - Date.now()) / 1000)),
         },
-      }
+      },
     );
   }
 
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
   if (!rawSerial) {
     return NextResponse.json(
       { error: "Serial number is required." },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
   if (!/^[A-Z0-9\-]{4,32}$/.test(serial)) {
     return NextResponse.json(
       { error: "Invalid serial number format." },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -46,29 +46,23 @@ export async function GET(request: NextRequest) {
 
   const watch = await Watch.findOne({ serialNumber: serial });
 
-  // Always log the attempt (after DB check)
-  const logEntry = {
+  // Always log the attempt
+  ScanLog.create({
     serialAttempted: serial,
     ip,
     userAgent: request.headers.get("user-agent") ?? "",
     found: !!watch,
     timestamp: new Date(),
-  };
-
-  // Fire-and-forget log — don't await to keep response fast
-  ScanLog.create(logEntry).catch(console.error);
+  }).catch(console.error);
 
   if (!watch) {
     return NextResponse.json(
       { found: false },
-      {
-        status: 404,
-        headers: { "X-RateLimit-Remaining": String(remaining) },
-      }
+      { status: 404, headers: { "X-RateLimit-Remaining": String(remaining) } },
     );
   }
 
-  // Update scan tracking
+  // Update scan tracking (fire and forget)
   const now = new Date();
   Watch.findByIdAndUpdate(watch._id, {
     $inc: { scanCount: 1 },
@@ -78,23 +72,22 @@ export async function GET(request: NextRequest) {
     },
   }).catch(console.error);
 
-  // Return only the fields needed for the passport — no internal IDs
   return NextResponse.json(
     {
       found: true,
       passport: {
-        serialNumber:  watch.serialNumber,
-        model:         watch.model,
-        collection:    watch.collection,
-        movement:      watch.movement,
-        status:        watch.status,
+        serialNumber: watch.serialNumber,
+        model: watch.model,
+        collection: watch.collection,
+        movement: watch.movement,
+        status: watch.status,
         warrantyStatus: watch.warrantyStatus,
         dateOfPurchase: watch.dateOfPurchase,
-        dealer:        watch.dealer,
-        scanCount:     watch.scanCount + 1,  // reflect this scan
+        dealer: watch.dealer,
+        scanCount: watch.scanCount + 1,
         firstScannedAt: watch.firstScannedAt ?? now,
       },
     },
-    { headers: { "X-RateLimit-Remaining": String(remaining) } }
+    { headers: { "X-RateLimit-Remaining": String(remaining) } },
   );
 }

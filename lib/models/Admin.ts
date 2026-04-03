@@ -1,4 +1,3 @@
-// lib/models/Admin.ts
 import mongoose, { Schema, Document, Model } from "mongoose";
 import bcrypt from "bcryptjs";
 
@@ -21,20 +20,9 @@ const AdminSchema = new Schema<IAdmin>(
       lowercase: true,
       trim: true,
     },
-    passwordHash: {
-      type: String,
-      required: true,
-    },
-    name: {
-      type: String,
-      trim: true,
-      default: "Admin",
-    },
-    role: {
-      type: String,
-      enum: ["admin", "superadmin"],
-      default: "admin",
-    },
+    passwordHash: { type: String, required: true },
+    name: { type: String, trim: true, default: "Admin" },
+    role: { type: String, enum: ["admin", "superadmin"], default: "admin" },
   },
   {
     timestamps: true,

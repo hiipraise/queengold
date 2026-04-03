@@ -17,14 +17,14 @@ export default function AdminLoginClient() {
     setLoading(true);
     setError("");
 
-    const res = await signIn("credentials", {
+    const res = await signIn("admin-credentials", {
       email,
       password,
       redirect: false,
     });
 
     if (res?.ok) {
-      router.push("/admin/watches");
+      router.push("/admin/dashboard");
     } else {
       setError("Invalid email or password.");
       setLoading(false);
@@ -81,8 +81,7 @@ export default function AdminLoginClient() {
             </div>
 
             {error && (
-              <p className="text-sm text-center animate-fade-in"
-                 style={{ color: "#E8A0A0" }}>
+              <p className="text-sm text-center animate-fade-in" style={{ color: "#E8A0A0" }}>
                 {error}
               </p>
             )}

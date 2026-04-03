@@ -1,4 +1,3 @@
-// app/admin/(protected)/layout.tsx
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
@@ -10,8 +9,9 @@ export default async function AdminLayout({
   children: React.ReactNode;
 }) {
   const session = await getServerSession(authOptions);
+  const role    = (session?.user as { role?: string } | undefined)?.role;
 
-  if (!session) {
+  if (!session || (role !== "admin" && role !== "superadmin")) {
     redirect("/admin/login");
   }
 

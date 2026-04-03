@@ -8,16 +8,16 @@ export async function GET(request: NextRequest) {
   if (error) return error;
 
   await connectDB();
-
   const { searchParams } = new URL(request.url);
-  const page   = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10));
-  const limit  = Math.min(100, parseInt(searchParams.get("limit") ?? "50", 10));
+  const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10));
+  const limit = Math.min(100, parseInt(searchParams.get("limit") ?? "50", 10));
   const serial = searchParams.get("sn") ?? "";
-  const ip     = searchParams.get("ip") ?? "";
+  const ip = searchParams.get("ip") ?? "";
 
   const query: Record<string, unknown> = {};
-  if (serial) query.serialAttempted = { $regex: serial.toUpperCase(), $options: "i" };
-  if (ip)     query.ip = ip;
+  if (serial)
+    query.serialAttempted = { $regex: serial.toUpperCase(), $options: "i" };
+  if (ip) query.ip = ip;
 
   const [logs, total] = await Promise.all([
     ScanLog.find(query)

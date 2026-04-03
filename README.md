@@ -1,220 +1,179 @@
-# Queen Gold — Digital Watch Passport System
+# Queen Gold — Luxury Ecommerce Platform
 
-A full-stack QR-based authentication and verification platform for Queen Gold luxury timepieces, built with Next.js 14, MongoDB, and Tailwind CSS.
-
----
-
-## Features
-
-- **Public Verify Page** — `/verify?sn=SERIAL` — luxury Digital Watch Passport display
-- **QR Code Flow** — scan QR → auto-fill serial → show passport
-- **Admin Panel** — `/admin` — register watches, manage status, download QR codes
-- **Scan Logs** — every verification attempt is logged (IP, timestamp, serial, result)
-- **Rate Limiting** — 10 requests per IP per minute on `/api/verify`
-- **Security** — unique serial constraint, uppercase normalization, session-protected admin
-- **SEO-friendly** — `?sn=` URL param, proper metadata, no client-side-only rendering
+A full-stack luxury wristwatch ecommerce platform built with Next.js 14, MongoDB, NextAuth, Tailwind CSS, and Squad by GTBank payment integration. Includes the original QR-based Digital Watch Passport verification system fully integrated as a trust feature.
 
 ---
 
 ## Tech Stack
 
-| Layer      | Technology                                  |
-|------------|---------------------------------------------|
-| Framework  | Next.js 14 (App Router)                     |
-| Database   | MongoDB via Mongoose                        |
-| Auth       | NextAuth.js (credentials, JWT sessions)     |
-| Styling    | Tailwind CSS + custom CSS variables         |
-| QR Codes   | `qrcode` npm package                        |
-| Fonts      | Playfair Display, Cormorant SC, Jost        |
+| Layer        | Technology                                  |
+|--------------|---------------------------------------------|
+| Framework    | Next.js 14 (App Router, RSC)                |
+| Database     | MongoDB via Mongoose                        |
+| Auth         | NextAuth.js — Admin + Customer credentials  |
+| Payments     | Squad by GTBank                             |
+| Styling      | Tailwind CSS + CSS custom properties        |
+| QR Codes     | `qrcode` npm package                        |
+| Fonts        | Playfair Display, Cormorant SC, Jost        |
 
 ---
 
 ## Quick Start
 
 ### 1. Install dependencies
-
 ```bash
 npm install
 ```
 
 ### 2. Configure environment
-
 ```bash
 cp .env.example .env.local
 ```
 
 Edit `.env.local`:
-
 ```env
 MONGODB_URI=mongodb://localhost:27017/queen-gold
-NEXTAUTH_SECRET=your-random-secret-min-32-chars
+NEXTAUTH_SECRET=your-random-secret         # openssl rand -base64 32
 NEXTAUTH_URL=http://localhost:3000
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ADMIN_EMAIL=admin@queengold.com
 ADMIN_PASSWORD=YourSecurePassword!
-```
 
-> Generate a secret: `openssl rand -base64 32`
+# Squad by GTBank — https://dashboard.squadco.com/
+SQUAD_SECRET_KEY=sandbox_sk_xxxxxxxxxxxx
+SQUAD_PUBLIC_KEY=sandbox_pk_xxxxxxxxxxxx
+SQUAD_ENV=sandbox
+```
 
 ### 3. Seed the database
-
 ```bash
-npx tsx scripts/seed.ts
+npm run seed            # Admin user + 3 sample watches
+npm run seed:ecommerce  # 10 categories + 3 collections + 8 products
+# Or both:
+npm run seed:all
 ```
 
-This creates:
-- Admin user (using `ADMIN_EMAIL` / `ADMIN_PASSWORD` from `.env.local`)
-- 3 sample watches (serials: `Q04R7254`, `Q04R7255`, `Q04R7300`)
-
-### 4. Run in development
-
+### 4. Run development server
 ```bash
 npm run dev
 ```
 
-Visit:
-- **Verify page:** http://localhost:3000/verify
-- **Admin login:** http://localhost:3000/admin/login
-- **Test passport:** http://localhost:3000/verify?sn=Q04R7254
-
 ---
 
-## Project Structure
-
-```
-queen-gold/
-├── app/
-│   ├── api/
-│   │   ├── auth/[...nextauth]/    # NextAuth handler
-│   │   ├── verify/                # Public verification endpoint
-│   │   └── admin/
-│   │       ├── watches/           # CRUD for watches
-│   │       ├── watches/[serial]/  # Single watch operations
-│   │       ├── logs/              # Scan log viewer
-│   │       └── qr/                # QR code generator
-│   ├── verify/                    # Public verify page
-│   ├── admin/
-│   │   ├── login/                 # Admin login
-│   │   ├── watches/               # Watch management
-│   │   └── logs/                  # Scan logs
-│   ├── globals.css
-│   └── layout.tsx
-├── components/
-│   ├── QueenGoldLogo.tsx          # SVG crown logo
-│   ├── WatchPassport.tsx          # Digital passport card
-│   └── AdminNav.tsx               # Admin navigation
-├── lib/
-│   ├── mongodb.ts                 # DB connection singleton
-│   ├── models/
-│   │   ├── Watch.ts               # Watch model + indexes
-│   │   ├── ScanLog.ts             # Scan log model (TTL 90d)
-│   │   └── Admin.ts               # Admin user model
-│   ├── auth.ts                    # NextAuth config
-│   ├── admin-guard.ts             # Admin session helper
-│   ├── rate-limit.ts              # In-memory rate limiter
-│   └── utils.ts                   # Shared utilities
-├── middleware.ts                  # Edge auth guard for /admin
-├── scripts/
-│   └── seed.ts                    # DB seed script
-└── types/
-    └── next-auth.d.ts             # Session type extensions
-```
-
----
-
-## API Reference
+## URL Map
 
 ### Public
+| URL | Description |
+|-----|-------------|
+| `/` | Homepage |
+| `/shop` | Product catalog with filters |
+| `/shop?category=mens-watches` | Category filter |
+| `/shop?gender=women` | Gender filter |
+| `/shop?filter=new\|bestseller\|limited\|sale` | Type filter |
+| `/shop?q=search+term` | Search |
+| `/products/[slug]` | Product detail page |
+| `/collections` | Collections gallery |
+| `/collections/[slug]` | Collection detail |
+| `/cart` | Cart page |
+| `/checkout` | Multi-step checkout |
+| `/checkout/callback` | Squad payment return handler |
+| `/verify?sn=SERIAL` | Digital Watch Passport verification |
+| `/about` | Brand story |
+| `/contact` | Contact form |
+| `/care` | Watch care guide |
+| `/warranty` | Warranty information |
+| `/privacy` | Privacy policy |
+| `/terms` | Terms of service |
 
-| Method | Endpoint              | Description                      |
-|--------|-----------------------|----------------------------------|
-| GET    | `/api/verify?sn=XXX`  | Verify a serial number           |
+### Customer Account
+| URL | Description |
+|-----|-------------|
+| `/account/login` | Customer sign in |
+| `/account/register` | Create account |
+| `/account` | Dashboard |
+| `/account/orders` | Order history |
+| `/account/wishlist` | Saved products |
+| `/account/addresses` | Saved addresses |
+| `/account/settings` | Change password |
 
-**Rate limit:** 10 requests / 60 seconds per IP.
-
-**Response (found):**
-```json
-{
-  "found": true,
-  "passport": {
-    "serialNumber": "Q04R7254",
-    "model": "QG-ER-01",
-    "collection": "Eternal Reign",
-    "movement": "CROWNCALIBRE™ CC-01",
-    "status": "sold",
-    "warrantyStatus": "active",
-    "dateOfPurchase": "2024-11-12T00:00:00.000Z",
-    "dealer": "Queen Gold Lagos",
-    "scanCount": 3,
-    "firstScannedAt": "2024-11-12T10:00:00.000Z"
-  }
-}
-```
-
-**Response (not found):**
-```json
-{ "found": false }
-```
-
-### Admin (requires session)
-
-| Method | Endpoint                          | Description              |
-|--------|-----------------------------------|--------------------------|
-| GET    | `/api/admin/watches`              | List all watches         |
-| POST   | `/api/admin/watches`              | Register new watch       |
-| GET    | `/api/admin/watches/:serial`      | Get single watch         |
-| PATCH  | `/api/admin/watches/:serial`      | Update watch             |
-| DELETE | `/api/admin/watches/:serial`      | Delete watch             |
-| GET    | `/api/admin/logs`                 | View scan logs           |
-| GET    | `/api/admin/qr?sn=XXX&size=1600` | Download high-resolution QR code PNG |
+### Admin Panel (requires admin role)
+| URL | Description |
+|-----|-------------|
+| `/admin/login` | Admin sign in |
+| `/admin/dashboard` | KPI overview |
+| `/admin/watches` | Watch registry + QR generator |
+| `/admin/products` | Product management |
+| `/admin/products/new` | Add new product |
+| `/admin/products/[id]/edit` | Edit product |
+| `/admin/orders` | Order management + status updates |
+| `/admin/collections` | Collection management |
+| `/admin/categories` | Category management |
+| `/admin/logs` | Scan log viewer |
+| `/admin/account` | Admin account settings |
 
 ---
 
-## Security Design
+## Squad Payment Flow
 
-| Concern              | Implementation                                          |
-|----------------------|---------------------------------------------------------|
-| Serial uniqueness    | MongoDB unique index + Mongoose pre-save normalization  |
-| Brute force          | In-memory rate limiter (10 req/min per IP)              |
-| Audit trail          | Every `/api/verify` call logs IP, UA, serial, result    |
-| Admin protection     | NextAuth JWT session + edge middleware                  |
-| Data exposure        | `_id`, `__v`, `passwordHash` stripped from all responses|
-| Serial normalization | Always stored as `UPPERCASE`, whitespace stripped       |
-| Log TTL              | Scan logs auto-expire after 90 days                     |
-
-### Production Rate Limiting (Redis)
-
-For production, replace the in-memory store in `lib/rate-limit.ts` with a Redis-backed solution:
-
-```bash
-npm install rate-limiter-flexible ioredis
+```
+Checkout form
+  → POST /api/orders          (create pending order)
+  → POST /api/payments/squad/initiate   (get Squad checkout URL)
+  → Redirect to Squad hosted checkout
+  → Customer pays
+  → Squad redirects to /checkout/callback?transaction_ref=XXX
+  → GET /api/payments/squad/verify      (verify with Squad API)
+  → Order confirmed, stock decremented, cart cleared
+  → Squad also fires POST /api/payments/squad/webhook (HMAC-verified)
 ```
 
-```ts
-// lib/rate-limit.ts — Redis version
-import { RateLimiterRedis } from "rate-limiter-flexible";
-import Redis from "ioredis";
-
-const client = new Redis(process.env.REDIS_URL!);
-
-const limiter = new RateLimiterRedis({
-  storeClient: client,
-  keyPrefix:   "rl_verify",
-  points:      10,
-  duration:    60,
-});
+Set your Squad webhook URL to:
+```
+https://yourdomain.com/api/payments/squad/webhook
 ```
 
 ---
 
-## QR Code Flow
+## Data Models
 
-1. Admin registers a watch with serial `Q04R7254`
-2. Admin downloads QR code from the admin panel (links to `/verify?sn=Q04R7254`)
-3. QR code is printed on warranty card / packaging
-4. Customer scans QR → lands on `/verify?sn=Q04R7254`
-5. Serial auto-fills → verification runs automatically
-6. Digital Watch Passport is displayed
+| Model | Purpose |
+|-------|---------|
+| `Admin` | Admin/superadmin users |
+| `Watch` | Watch registry for Digital Passport |
+| `ScanLog` | Verification attempt audit log (TTL 90 days) |
+| `Product` | Ecommerce products with full specs |
+| `Category` | Product categories |
+| `Collection` | Curated collections |
+| `Customer` | Customer accounts |
+| `Cart` | Session-based shopping cart (TTL 7 days) |
+| `Order` | Complete order records |
+| `Payment` | Squad payment transaction records |
+| `Wishlist` | Customer saved products |
+| `Coupon` | Discount codes (percentage or fixed) |
+
+---
+
+## Seeded Demo Data
+
+### Categories (10)
+Men's Watches · Women's Watches · Unisex · Classic · Sport · Luxury · Limited Edition · New Arrivals · Best Sellers · Signature Collection
+
+### Collections (3)
+- **Eternal Reign** — flagship (featured)
+- **Midnight Sovereign** — all-black DLCS (featured)
+- **Lagos Gold Rush** — bold chronographs
+
+### Products (8)
+| Name | Price | Type |
+|------|-------|------|
+| QG Eternal Reign I | ₦485,000 | Best Seller, Men's |
+| QG Midnight Sovereign I | ₦695,000 | New Arrival, Luxury (10% off) |
+| QG Lagos Gold Rush Chrono | ₦395,000 | New Arrival, Men's |
+| QG Sovereign Lady Rose | ₦320,000 | Best Seller, Women's |
+| QG Eternal Reign GMT | ₦575,000 | New Arrival, Men's |
+| QG Crown Limited 001/100 | ₦1,850,000 | Limited Edition |
+| QG Sport Diver Pro | ₦285,000 | Best Seller, Sport (on sale) |
+| QG Classic Dress Silver | ₦220,000 | Classic, Men's |
 
 ---
 
@@ -222,31 +181,21 @@ const limiter = new RateLimiterRedis({
 
 1. Push repo to GitHub
 2. Import to Vercel
-3. Add environment variables in Vercel dashboard
-4. Use MongoDB Atlas connection string for `MONGODB_URI`
-5. Run seed against production DB once:
+3. Add all environment variables in Vercel dashboard
+4. Set `SQUAD_ENV=live` and use live Squad keys for production
+5. Add your domain to `next.config.mjs` → `images.remotePatterns`
+6. Run ecommerce seed against production DB:
    ```bash
-   MONGODB_URI=<atlas-uri> npx tsx scripts/seed.ts
+   MONGODB_URI=<atlas-uri> npm run seed:all
    ```
+7. Set Squad webhook URL to `https://yourdomain.com/api/payments/squad/webhook`
 
 ---
 
-## Future: NFC Integration
+## File Count: 116 files
 
-The system is designed to extend to NFC. Each NFC tag can encode the same URL (`/verify?sn=SERIAL`). No backend changes needed — the verify endpoint is already URL-param driven.
-
-To add NFC write capability to the admin panel:
-
-```ts
-// Future admin feature
-const ndef = new NDEFReader();
-await ndef.write({
-  records: [{ recordType: "url", data: `https://queengold.com/verify?sn=${serial}` }]
-});
-```
+All TypeScript, zero JavaScript. Production-ready architecture with proper separation of concerns, server components where possible, client components only where interactivity is required.
 
 ---
 
-## License
-
-Private — Queen Gold internal use only.
+*Queen Gold — Authentic Luxury Timepieces · Lagos, Nigeria*

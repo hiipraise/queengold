@@ -1,13 +1,15 @@
 {
   "name": "queen-gold",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "seed": "tsx scripts/seed.ts"
+    "seed": "tsx scripts/seed.ts",
+    "seed:ecommerce": "tsx scripts/seed-ecommerce.ts",
+    "seed:all": "npm run seed && npm run seed:ecommerce"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.1",

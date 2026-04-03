@@ -40,9 +40,9 @@ const config: Config = {
         },
       },
       fontFamily: {
-        serif:      ["var(--font-playfair)", "Playfair Display", "Georgia", "serif"],
-        sans:       ["var(--font-cormorant-sc)", "Cormorant SC", "serif"],
-        body:       ["var(--font-jost)", "Jost", "system-ui", "sans-serif"],
+        serif:   ["Playfair Display", "Georgia", "serif"],
+        display: ["Cormorant SC", "serif"],
+        body:    ["Jost", "system-ui", "sans-serif"],
       },
       backgroundImage: {
         "gold-gradient":
@@ -53,15 +53,16 @@ const config: Config = {
           "linear-gradient(180deg, #1A0509 0%, #2D0614 50%, #3A0B1C 100%)",
       },
       boxShadow: {
-        gold:    "0 0 30px rgba(212, 175, 55, 0.15)",
+        gold:      "0 0 30px rgba(212, 175, 55, 0.15)",
         "gold-lg": "0 0 60px rgba(212, 175, 55, 0.25)",
-        luxury:  "0 8px 48px rgba(0,0,0,0.6), inset 0 1px 0 rgba(212,175,55,0.15)",
+        luxury:    "0 8px 48px rgba(0,0,0,0.6), inset 0 1px 0 rgba(212,175,55,0.15)",
       },
       animation: {
         "fade-up":    "fadeUp 0.6s ease forwards",
         "fade-in":    "fadeIn 0.4s ease forwards",
         shimmer:      "shimmer 2s linear infinite",
         "pulse-gold": "pulseGold 2s ease-in-out infinite",
+        "spin-slow":  "spin 2s linear infinite",
       },
       keyframes: {
         fadeUp: {
@@ -80,6 +81,9 @@ const config: Config = {
           "0%, 100%": { boxShadow: "0 0 20px rgba(212,175,55,0.2)" },
           "50%":      { boxShadow: "0 0 40px rgba(212,175,55,0.4)" },
         },
+      },
+      transitionDuration: {
+        "400": "400ms",
       },
     },
   },

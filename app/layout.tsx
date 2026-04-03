@@ -1,6 +1,10 @@
-// app/layout.tsx
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import CartDrawer from "@/components/CartDrawer";
+import { CartProvider } from "@/lib/contexts/CartContext";
+import { WishlistProvider } from "@/lib/contexts/WishlistContext";
 
 export const metadata: Metadata = {
   title: {
@@ -8,7 +12,7 @@ export const metadata: Metadata = {
     template: "%s | Queen Gold",
   },
   description:
-    "Verify the authenticity of your Queen Gold timepiece with our Digital Watch Passport system.",
+    "Discover Queen Gold's collection of handcrafted luxury wristwatches. Each piece certified authentic with our Digital Watch Passport.",
   robots: { index: true, follow: true },
   openGraph: {
     siteName: "Queen Gold",
@@ -39,7 +43,16 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased">
-        {children}
+        <CartProvider>
+          <WishlistProvider>
+            <Navbar />
+            <CartDrawer />
+            <main className="flex flex-col min-h-screen">
+              {children}
+            </main>
+            <Footer />
+          </WishlistProvider>
+        </CartProvider>
       </body>
     </html>
   );

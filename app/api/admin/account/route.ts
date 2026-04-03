@@ -15,27 +15,32 @@ export async function PATCH(request: NextRequest) {
 
   const body = await request.json();
   const currentPassword = String(body.currentPassword ?? "");
-  const nextEmail = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
-  const nextPassword = typeof body.newPassword === "string" ? body.newPassword : "";
+  const nextEmail =
+    typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
+  const nextPassword =
+    typeof body.newPassword === "string" ? body.newPassword : "";
 
   if (!currentPassword) {
-    return NextResponse.json({ error: "Current password is required." }, { status: 400 });
-  }
-
-  if (!nextEmail && !nextPassword) {
     return NextResponse.json(
-      { error: "Provide a new email address, a new password, or both." },
+      { error: "Current password is required." },
       { status: 400 },
     );
   }
-
-  if (nextEmail && !EMAIL_PATTERN.test(nextEmail)) {
-    return NextResponse.json({ error: "Enter a valid email address." }, { status: 400 });
+  if (!nextEmail && !nextPassword) {
+    return NextResponse.json(
+      { error: "Provide a new email, a new password, or both." },
+      { status: 400 },
+    );
   }
-
+  if (nextEmail && !EMAIL_PATTERN.test(nextEmail)) {
+    return NextResponse.json(
+      { error: "Enter a valid email address." },
+      { status: 400 },
+    );
+  }
   if (nextPassword && nextPassword.length < 8) {
     return NextResponse.json(
-      { error: "New password must be at least 8 characters long." },
+      { error: "New password must be at least 8 characters." },
       { status: 400 },
     );
   }
@@ -43,30 +48,32 @@ export async function PATCH(request: NextRequest) {
   await connectDB();
 
   const admin = await Admin.findById(session.user.id);
-  if (!admin) {
-    return NextResponse.json({ error: "Admin account not found." }, { status: 404 });
-  }
+  if (!admin)
+    return NextResponse.json(
+      { error: "Admin account not found." },
+      { status: 404 },
+    );
 
-  const validPassword = await admin.comparePassword(currentPassword);
-  if (!validPassword) {
-    return NextResponse.json({ error: "Current password is incorrect." }, { status: 400 });
-  }
+  const valid = await admin.comparePassword(currentPassword);
+  if (!valid)
+    return NextResponse.json(
+      { error: "Current password is incorrect." },
+      { status: 400 },
+    );
 
   if (nextEmail && nextEmail !== admin.email) {
-    const existingAdmin = await Admin.findOne({ email: nextEmail, _id: { $ne: admin._id } }).lean();
-    if (existingAdmin) {
+    const exists = await Admin.findOne({
+      email: nextEmail,
+      _id: { $ne: admin._id },
+    }).lean();
+    if (exists)
       return NextResponse.json(
-        { error: "That email address is already in use." },
+        { error: "That email is already in use." },
         { status: 409 },
       );
-    }
-
     admin.email = nextEmail;
   }
-
-  if (nextPassword) {
-    admin.passwordHash = nextPassword;
-  }
+  if (nextPassword) admin.passwordHash = nextPassword;
 
   await admin.save();
 

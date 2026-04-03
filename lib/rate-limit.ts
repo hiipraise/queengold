@@ -1,7 +1,6 @@
 /**
  * Rate limiter for the /verify endpoint.
- * Uses in-memory store by default; swap in Redis for production.
- *
+ * In-memory store by default — swap to Redis for production.
  * Limits: 10 verify attempts per IP per 60 seconds.
  */
 
@@ -12,7 +11,7 @@ interface Bucket {
 
 const store = new Map<string, Bucket>();
 
-const WINDOW_MS = 60_000; // 1 minute
+const WINDOW_MS   = 60_000;
 const MAX_REQUESTS = 10;
 
 export function rateLimitVerify(ip: string): {
@@ -30,17 +29,16 @@ export function rateLimitVerify(ip: string): {
 
   bucket.count += 1;
 
-  // Cleanup old entries periodically
+  // Periodic cleanup
   if (store.size > 5_000) {
     for (const [key, val] of Array.from(store.entries())) {
       if (now > val.resetAt) store.delete(key);
     }
   }
 
-  const allowed = bucket.count <= MAX_REQUESTS;
   return {
-    allowed,
+    allowed:   bucket.count <= MAX_REQUESTS,
     remaining: Math.max(0, MAX_REQUESTS - bucket.count),
-    resetAt: bucket.resetAt,
+    resetAt:   bucket.resetAt,
   };
 }

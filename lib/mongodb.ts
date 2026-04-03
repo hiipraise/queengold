@@ -13,7 +13,6 @@ interface MongooseCache {
   promise: Promise<typeof mongoose> | null;
 }
 
-// Prevent multiple connections in development (hot-reload)
 const globalWithMongoose = global as typeof globalThis & {
   _mongooseCache?: MongooseCache;
 };

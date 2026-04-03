@@ -21,9 +21,7 @@
 }
 
 /* ─── Base ────────────────────────────────────────────────────────────────── */
-*, *::before, *::after {
-  box-sizing: border-box;
-}
+*, *::before, *::after { box-sizing: border-box; }
 
 html {
   scroll-behavior: smooth;
@@ -132,6 +130,12 @@ body::before {
   box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.08), 0 0 20px rgba(212, 175, 55, 0.1);
 }
 
+/* ─── Select fix ─────────────────────────────────────────────────────────── */
+select.input-luxury option {
+  background: #2D0614;
+  color: var(--text-primary);
+}
+
 /* ─── Button styles ──────────────────────────────────────────────────────── */
 .btn-gold {
   background: linear-gradient(135deg, #C9A84C 0%, #D4AF37 40%, #F5E6C8 55%, #D4AF37 70%, #B8962E 100%);
@@ -142,6 +146,7 @@ body::before {
   letter-spacing: 0.2em;
   transition: background-position 0.4s, transform 0.15s, box-shadow 0.15s;
   box-shadow: 0 2px 16px rgba(212, 175, 55, 0.3);
+  cursor: pointer;
 }
 
 .btn-gold:hover {
@@ -199,7 +204,13 @@ body::before {
 .delay-500 { animation-delay: 0.5s; opacity: 0; }
 
 /* ─── Scrollbar ──────────────────────────────────────────────────────────── */
-::-webkit-scrollbar       { width: 6px; }
+::-webkit-scrollbar       { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: #1A0509; }
 ::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, 0.3); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(212, 175, 55, 0.5); }
+
+/* ─── Utility: z-10 relative for overlaying body::before ─────────────────── */
+main, header, nav, aside, footer, section, article {
+  position: relative;
+  z-index: 1;
+}

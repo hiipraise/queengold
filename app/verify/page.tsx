@@ -5,9 +5,7 @@ export const metadata: Metadata = {
   title: "Verify Your Watch — Digital Watch Passport",
   description:
     "Enter your Queen Gold serial number to verify your timepiece's authenticity and view its Digital Watch Passport.",
-  alternates: {
-    canonical: "/verify",
-  },
+  alternates: { canonical: "/verify" },
   openGraph: {
     title:       "Verify Your Queen Gold Timepiece",
     description: "Instant authenticity verification. Enter your serial number to reveal your Digital Watch Passport.",
@@ -20,6 +18,5 @@ interface Props {
 }
 
 export default function VerifyPage({ searchParams }: Props) {
-  // sn param is passed from QR code: /verify?sn=Q04R7254
   return <VerifyClient initialSerial={searchParams.sn ?? ""} />;
 }
