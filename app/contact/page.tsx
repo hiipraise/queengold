@@ -1,7 +1,4 @@
-"use client";
-
 import type { Metadata } from "next";
-import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Contact Us — Queen Gold",
@@ -37,7 +34,7 @@ export default function ContactPage() {
 
         <div className="card-luxury p-8">
           <h2 className="font-serif text-2xl text-gold-gradient mb-6">Send a Message</h2>
-          <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+          <form className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block font-display text-[10px] tracking-[0.2em] uppercase mb-1.5" style={{ color: "var(--gold-muted)" }}>First Name</label>
